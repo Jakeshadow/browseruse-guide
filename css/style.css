@@ -128,10 +128,10 @@ tbody tr:nth-child(even) { background: var(--gray-50); }
 .faq-answer { padding: 16px 20px; font-size: 0.95rem; color: var(--text-secondary); }
 
 /* CTA Strip */
-.cta-strip { background: var(--gray-900); color: #fff; text-align: center; padding: 60px 24px; }
-.cta-strip h2 { color: #fff; font-size: 1.6rem; margin-bottom: 8px; }
+.cta-strip { background: var(--accent-light); color: var(--text); text-align: center; padding: 60px 24px; }
+.cta-strip h2 { color: var(--text); font-size: 1.6rem; margin-bottom: 8px; }
 .cta-strip h2::after { display: none; }
-.cta-strip p { color: var(--gray-500); margin-bottom: 24px; font-size: 1.05rem; }
+.cta-strip p { color: var(--text-secondary); margin-bottom: 24px; font-size: 1.05rem; }
 
 /* Paywall */
 .paywall { position: relative; margin: 32px 0; padding: 40px 24px; text-align: center; background: var(--bg-alt); border: 2px dashed var(--gray-300); border-radius: var(--radius); }
