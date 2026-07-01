@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://runbrowseruse.com/</loc><priority>1.0</priority></url>
+  <url><loc>https://runbrowseruse.com/production-guide/</loc><priority>0.9</priority></url>
+  <url><loc>https://runbrowseruse.com/chapters/architecture/</loc><priority>0.7</priority></url>
+  <url><loc>https://runbrowseruse.com/chapters/docker-setup/</loc><priority>0.8</priority></url>
+  <url><loc>https://runbrowseruse.com/chapters/headless-headful/</loc><priority>0.7</priority></url>
+  <url><loc>https://runbrowseruse.com/chapters/anti-detection/</loc><priority>0.7</priority></url>
+  <url><loc>https://runbrowseruse.com/chapters/session-management/</loc><priority>0.7</priority></url>
+  <url><loc>https://runbrowseruse.com/chapters/batch-queue/</loc><priority>0.7</priority></url>
+  <url><loc>https://runbrowseruse.com/chapters/troubleshooting/</loc><priority>0.8</priority></url>
+  <url><loc>https://runbrowseruse.com/privacy/</loc><priority>0.3</priority></url>
+  <url><loc>https://runbrowseruse.com/terms/</loc><priority>0.3</priority></url>
+  <url><loc>https://runbrowseruse.com/refunds/</loc><priority>0.3</priority></url>
+</urlset>
