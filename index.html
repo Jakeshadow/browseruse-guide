@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Use Production Guide — Deploy in 2 Hours, Not 2 Weeks</title>
+  <meta name="description" content="Deploy Browser Use in production — Docker Compose, headless Chromium, anti-detection, batch queues. 7 chapters. 100K-star tool, zero official production docs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"></noscript>
+  <meta property="og:title" content="Browser Use Production Guide — Deploy in 2 Hours, Not 2 Weeks">
+  <meta property="og:description" content="100K stars. Zero production guides. Until now.">
+  <meta property="og:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://runbrowseruse.com/">
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+  <script>
+    Paddle.Initialize({
+      token: "LIVE_TOKEN_PLACEHOLDER",
+      environment: "production",
+      checkout: {
+        settings: {
+          displayMode: "overlay",
+          theme: "light",
+          locale: "auto",
+          successUrl: "https://runbrowseruse.com/thanks/?_ptxn={transaction_id}"
+        }
+      }
+    });
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Does this guide cover Browser Use Cloud API?",
+        "acceptedAnswer": {"@type": "Answer", "text": "No. This guide is for self-hosting Browser Use on your own infrastructure — Docker, headless Chromium, batch queues. If you only use the Cloud API, you don't need this guide."}
+      },
+      {
+        "@type": "Question",
+        "name": "Does this work with the new v0.13 Rust beta?",
+        "acceptedAnswer": {"@type": "Answer", "text": "Yes. The guide covers both the Python legacy agent and the v0.13 Rust-powered beta agent, with separate configuration paths for each."}
+      },
+      {
+        "@type": "Question",
+        "name": "What LLM do I need?",
+        "acceptedAnswer": {"@type": "Answer", "text": "The guide covers LLM/VLM backbone selection including Claude, GPT, Gemini, and the open-source bu-2-0 model. You can use any OpenAI-compatible endpoint."}
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a refund policy?",
+        "acceptedAnswer": {"@type": "Answer", "text": "Yes. 30-day money-back guarantee. If this guide doesn't save you at least 20 hours of production debugging, you get a full refund."}
+      },
+      {
+        "@type": "Question",
+        "name": "Is this affiliated with Browser Use Inc.?",
+        "acceptedAnswer": {"@type": "Answer", "text": "No. This is an unofficial community guide. We are not affiliated with Browser Use Inc. or Y Combinator. We link to the official repository and recommend their Cloud API for teams that don't need self-hosting."}
+      },
+      {
+        "@type": "Question",
+        "name": "Will this guide stay updated?",
+        "acceptedAnswer": {"@type": "Answer", "text": "Yes. The guide is updated for each new Browser Use release. The v0.13 Rust beta is the current target. Version-specific notes are included where behavior differs."}
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="56" font-family="sans-serif" font-weight="bold">BU</text></svg>Browser Use Guide
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/production-guide/">Production Guide</a></li>
+        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <p class="hero-badge">Unofficial Community Guide</p>
+        <h1>Your browser agent works locally. Production is a different story.</h1>
+        <p class="hero-subtitle">Browser Use has 100K+ GitHub stars and zero production deployment guides. Fix that — Docker, headless Chromium, anti-detection, batch queues. All in one place.</p>
+        <div class="hero-actions">
+          <a href="/production-guide/" class="btn btn-primary">Get the Production Guide — $39</a>
+          <a href="/chapters/docker-setup/" class="btn btn-outline">Read Free Preview</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><strong>100K+</strong> GitHub Stars</div>
+          <div class="hero-stat"><strong>0</strong> Production Guides</div>
+          <div class="hero-stat"><strong>7</strong> Chapters</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>What This Guide Covers</h2>
+        <p class="section-lead">Seven chapters. Each solves a problem that GitHub Issues is full of — and the official docs don't cover.</p>
+        <div class="chapters-grid">
+          <div class="chapter-card">
+            <h3>1. Architecture & Component Selection</h3>
+            <p>Open-source Agent vs Cloud API — which actually fits your use case? LLM backbone, Rust beta vs Python legacy, VLM requirements.</p>
+            <p><small>You'll get: Decision tree, cost comparison table, hardware sizing guide</small></p>
+          </div>
+          <div class="chapter-card">
+            <h3>2. Docker Production Setup</h3>
+            <p>"Docker doesn't work at all but locally it's fine" — GitHub Issue #2513. Multi-layer Dockerfile, Compose config, Chromium flags that actually work.</p>
+            <p><small>You'll get: Production Dockerfile, docker-compose.yml, Chrome flag reference</small></p>
+          </div>
+          <div class="chapter-card">
+            <h3>3. Headless vs Headful</h3>
+            <p>Agent stuck at Step 1 and you can't see why. When headless fails, Xvfb + Fluxbox virtual desktop is the answer.</p>
+            <p><small>You'll get: Headless debugging techniques, Xvfb setup, cost/performance trade-off</small></p>
+          </div>
+          <div class="chapter-card">
+            <h3>4. Anti-Detection & Stealth</h3>
+            <p>Websites block your agent. Fingerprint spoofing, residential proxy integration, CDP-level Playwright fingerprint removal.</p>
+            <p><small>You'll get: Stealth configuration, proxy rotation setup, fingerprint testing script</small></p>
+          </div>
+          <div class="chapter-card">
+            <h3>5. Session Management</h3>
+            <p>Re-logging into every service on every run is a dealbreaker. Cookie persistence, session snapshots, replay.</p>
+            <p><small>You'll get: S3-backed session storage, snapshot/restore scripts, multi-tab context switching</small></p>
+          </div>
+          <div class="chapter-card">
+            <h3>6. Batch Task Queue & Concurrency</h3>
+            <p>One agent won't cut it. Celery/RQ task queue, multi-agent concurrency pool, GPU VRAM + CPU + memory budget.</p>
+            <p><small>You'll get: Celery integration code, agent pool manager, resource scheduler</small></p>
+          </div>
+          <div class="chapter-card">
+            <h3>7. Error Troubleshooting Bible</h3>
+            <p>"Agent stuck at Step 1", "Timeout on element", "Memory leak after 100 tasks" — every common failure, diagnosed and fixed.</p>
+            <p><small>You'll get: Error→diagnosis→fix reference, debugging checklist, memory profiling script</small></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <h2>Why No One Else Wrote This</h2>
+        <p class="section-lead">Browser Use's official README says: <em>"For production use cases, use our Browser Use Cloud API."</em> The self-hosted production path requires reverse-engineering four layers — Docker, Playwright CDP, Chromium, and VLM — with zero official documentation. This is the guide that fills that structural gap.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2 class="anti-title">Who This Is For</h2>
+        <div class="anti-grid">
+          <div class="anti-item">
+            <strong>For: Self-hosting developers</strong>
+            <p>You want Browser Use running on your own Docker host, VPS, or Kubernetes cluster. Not the Cloud API.</p>
+          </div>
+          <div class="anti-item">
+            <strong>For: Teams building on Browser Use</strong>
+            <p>You're integrating Browser Use into a data pipeline, testing suite, or RPA workflow. You need it stable in production.</p>
+          </div>
+          <div class="anti-item">
+            <strong>For: Engineers who read source code</strong>
+            <p>You're already digging through GitHub Issues and source to figure out why it doesn't work. This guide saves you that time.</p>
+          </div>
+          <div class="anti-item">
+            <strong>Not for: Cloud API users</strong>
+            <p>If <code>pip install browser-use && agent.run()</code> is all you need, this guide is overkill. Use the official Cloud API.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-strip">
+      <div class="container">
+        <h2>Stop debugging production blind.</h2>
+        <p>7 chapters. Docker Compose templates. Anti-detection scripts. 30-day money-back guarantee.</p>
+        <a href="/production-guide/" class="btn btn-primary" style="font-size:1.05rem;padding:14px 40px;">Get the Production Guide — $39</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>FAQ</h2>
+        <div class="faq-list">
+          <details class="faq-item">
+            <summary>Does this guide cover Browser Use Cloud API?</summary>
+            <div class="faq-answer"><p>No. This guide is for self-hosting Browser Use on your own infrastructure — Docker, headless Chromium, batch queues. If you only use the Cloud API, you don't need this guide.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Does this work with the new v0.13 Rust beta?</summary>
+            <div class="faq-answer"><p>Yes. The guide covers both the Python legacy agent and the v0.13 Rust-powered beta agent, with separate configuration paths for each.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>What LLM do I need?</summary>
+            <div class="faq-answer"><p>The guide covers LLM/VLM backbone selection including Claude, GPT, Gemini, and the open-source bu-2-0 model. You can use any OpenAI-compatible endpoint.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Is there a refund policy?</summary>
+            <div class="faq-answer"><p>Yes. 30-day money-back guarantee. If this guide doesn't save you at least 20 hours of production debugging, you get a full refund. Details on our <a href="/refunds/">refunds page</a>.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Is this affiliated with Browser Use Inc.?</summary>
+            <div class="faq-answer"><p>No. This is an unofficial community guide. We are not affiliated with Browser Use Inc. or Y Combinator. We link to the <a href="https://github.com/browser-use/browser-use">official repository</a> and recommend their Cloud API for teams that don't need self-hosting.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Will this guide stay updated?</summary>
+            <div class="faq-answer"><p>Yes. The guide is updated for each new Browser Use release. The v0.13 Rust beta is the current target. Version-specific notes are included where behavior differs.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+</body>
+</html>
