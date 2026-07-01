@@ -3,65 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thank You — Browser Use Production Guide</title>
-  <meta name="description" content="Thank you for purchasing the Browser Use Production Guide. Check your email for access instructions.">
+  <title>Your Download — Browser Use Production Guide</title>
+  <meta name="robots" content="noindex">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="canonical" href="https://runbrowseruse.com/thanks/">
+  <style>
+    .thanks { text-align: center; max-width: 500px; margin: 0 auto; padding: 80px 24px 64px; }
+    .thanks h1 { font-size: 1.6rem; margin-bottom: 8px; }
+    .thanks .hint { color: var(--text-secondary, #5f6368); font-size: .93rem; margin-bottom: 36px; line-height: 1.5; }
+    .btn-dl { display: inline-block; padding: 14px 36px; font-size: 1.05rem; font-weight: 600; background: var(--accent, #10b981); color: #000; border-radius: 24px; text-decoration: none; transition: all .15s; box-shadow: 0 2px 10px rgba(16,185,129,.3); }
+    .btn-dl:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(16,185,129,.4); }
+    .help { color: var(--text-secondary, #5f6368); font-size: .82rem; margin-top: 40px; }
+    .help a { color: var(--accent, #10b981); }
+  </style>
 </head>
 <body>
-  <nav class="nav">
+  <nav id="nav" class="nav">
     <div class="nav-inner">
-      <a href="/" class="nav-logo">
-        <svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="56" font-family="sans-serif" font-weight="bold">BU</text></svg>Browser Use Guide
-      </a>
-      <ul class="nav-links" id="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="/production-guide/">Production Guide</a></li>
-        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
-        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
-        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
-      </ul>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
-        <span></span><span></span><span></span>
-      </button>
+      <a href="/" class="nav-logo">Browser Use Guide</a>
     </div>
   </nav>
 
-  <main>
-    <section class="section">
-      <div class="container" style="max-width:680px;">
-        <h1>Thank You</h1>
-        <p>Thank you for your purchase! Your download is ready below. You'll also receive a copy via email.</p>
-        <p>Transaction ID: <span id="txn-id">loading...</span></p>
-        <p><a href="/downloads/browser-use-production-guide-7a3d.pdf" class="btn btn-primary" style="display:inline-block;margin-top:16px;">Download PDF</a></p>
-        <p>For refunds, visit the Paddle customer portal (link in your receipt) or see our <a href="/refunds/">Money-Back Guarantee</a> page.</p>
-      </div>
-    </section>
+  <main class="thanks">
+    <h1>Thanks for your purchase</h1>
+    <p class="hint">PDF · v1.0 · July 2026<br>Lifetime updates included.</p>
+    <a href="/downloads/browser-use-production-guide-7a3d.pdf" download class="btn-dl">Download</a>
+    <p class="help">Need a refund? <a href="https://customer-portal.paddle.com/cpl_01ktyfrh42qnkmgvx3gxm1y03g" target="_blank" rel="noopener">Manage your order &rarr;</a><br>Questions? <a href="mailto:support@runbrowseruse.com">support@runbrowseruse.com</a></p>
   </main>
 
-  <footer class="footer">
-    <div class="container">
-      <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
-      <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
-    </div>
-  </footer>
-
-  <script src="/js/main.js"></script>
-  <script>
-  (function() {
-    const params = new URLSearchParams(window.location.search);
-    const txnId = params.get('_ptxn');
-    if (!txnId) {
-      window.location.replace('/production-guide/');
-      return;
-    }
-    document.getElementById('txn-id').textContent = txnId;
-  })();
-  </script>
+  <p style="text-align:center;font-size:.82rem;color:var(--text-secondary,#5f6368);padding-bottom:4px;">Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator.</p>
+  <p style="text-align:center;padding:0 0 32px;font-size:.82rem;color:var(--text-secondary,#5f6368);">
+    <a href="/privacy/" style="color:inherit;">Privacy Policy</a> &middot;
+    <a href="/terms/" style="color:inherit;">Terms of Service</a> &middot;
+    <a href="/refunds/" style="color:inherit;">Money-Back Guarantee</a>
+  </p>
+<script>
+  var params = new URLSearchParams(window.location.search);
+  if (params.has('_ptxn')) {
+    try { localStorage.setItem('bu_txn', params.get('_ptxn')); } catch(e) {}
+  } else if (!localStorage.getItem('bu_txn')) {
+    window.location.replace('/production-guide/');
+  }
+</script>
 </body>
 </html>
