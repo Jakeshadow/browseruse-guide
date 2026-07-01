@@ -1,0 +1,181 @@
+/* Browser Use Production Guide — PDF Style */
+/* Adapted from DiffusionGemma v10 style, accent switched to #10b981 */
+
+body {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #1a1a1a;
+  margin: 0;
+  padding: 0;
+  max-width: none !important;
+}
+
+/* H1: Chapter titles — always start on new page */
+h1 {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0d0d0d;
+  margin-top: 32px;
+  margin-bottom: 16px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #10b981;
+  page-break-before: always;
+  page-break-after: avoid;
+}
+
+body > h1:first-child,
+h1:first-of-type {
+  page-break-before: avoid;
+}
+
+h2 {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #064e3b;
+  margin-top: 28px;
+  margin-bottom: 12px;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-top: 22px;
+  margin-bottom: 10px;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  page-break-after: avoid;
+}
+
+h2 + p, h3 + p, h4 + p,
+h2 + ul, h3 + ul, h4 + ul,
+h2 + ol, h3 + ol, h4 + ol,
+h2 + blockquote, h3 + blockquote, h4 + blockquote,
+h2 + table, h3 + table, h4 + table {
+  page-break-before: avoid;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+code {
+  font-family: "Fira Code", "Cascadia Code", "JetBrains Mono", "Consolas", "SF Mono", monospace;
+  font-size: 11px;
+  background: #f3f4f6;
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: #1f2937;
+  word-break: break-all;
+}
+
+pre {
+  font-family: "Fira Code", "Cascadia Code", "JetBrains Mono", "Consolas", "SF Mono", monospace;
+  font-size: 10.5px;
+  line-height: 1.55;
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-left: 3px solid #10b981;
+  padding: 12px 14px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 12px 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+ul, ol {
+  padding-left: 24px;
+  margin: 8px 0;
+}
+
+li {
+  margin-bottom: 4px;
+  line-height: 1.65;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 14px 0;
+  font-size: 11px;
+  page-break-inside: avoid;
+}
+
+th {
+  background: #10b981;
+  color: white;
+  font-weight: 600;
+  padding: 8px 10px;
+  text-align: left;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+tr:nth-child(even) td {
+  background: #f9fafb;
+}
+
+blockquote {
+  border-left: 3px solid #10b981;
+  margin: 12px 0;
+  padding: 8px 16px;
+  background: #ecfdf5;
+  color: #374151;
+  border-radius: 0 4px 4px 0;
+  page-break-inside: avoid;
+}
+
+strong {
+  font-weight: 700;
+  color: #111827;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin: 24px 0;
+}
+
+a {
+  color: #10b981;
+  text-decoration: none;
+}
+
+input[type="checkbox"] {
+  margin-right: 6px;
+}
+
+@page {
+  size: A4;
+  margin: 15mm 18mm;
+}
+
+div#TOC, body > div, main, article, .container, .content, .main {
+  max-width: none !important;
+}
