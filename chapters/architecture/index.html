@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Use Architecture: Agent vs Cloud, Component Selection</title>
+  <meta name="description" content="Choose between Browser Use open-source agent and Cloud API. LLM backbone selection, Rust beta vs Python legacy, hardware sizing for self-hosted deployment.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"></noscript>
+  <meta property="og:title" content="Browser Use Architecture: Agent vs Cloud, Component Selection">
+  <meta property="og:description" content="Choose between Browser Use open-source agent and Cloud API. LLM backbone selection, Rust beta vs Python legacy, hardware sizing.">
+  <meta property="og:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://runbrowseruse.com/chapters/architecture/">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="56" font-family="sans-serif" font-weight="bold">BU</text></svg>Browser Use Guide
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/production-guide/">Production Guide</a></li>
+        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="preview-banner">
+    Free preview. Full chapter — decision tree, cost comparison table, hardware sizing guide — in the <a href="/production-guide/">Production Guide</a>.
+  </div>
+
+  <main class="section">
+    <div class="container">
+      <h1>Browser Use Architecture: Agent vs Cloud, Component Selection</h1>
+
+      <p>Before you write a single line of deployment config, you need to answer one question: which Browser Use path are you actually on? There are two, and they lead to very different infrastructure decisions.</p>
+
+      <p>The open-source Python agent (<code>browser-use</code> on PyPI) gives you full control: you own the Chromium instances, the LLM endpoints, and the execution environment. The managed Cloud API abstracts all of that away — you send a task description, Browser Use Inc. runs it on their infra, and you get the result back. The trade-off is straightforward: self-hosted means no per-task API cost but you carry the operational burden; Cloud API means zero ops but costs scale linearly with task volume. If you're running more than ~5,000 tasks per month, self-hosting starts to pull ahead on cost. Below that threshold, the Cloud API's per-task pricing is hard to beat once you factor in your own engineering time.</p>
+
+      <p>On the agent side, there's a second fork: the v0.13 Rust-powered beta agent versus the Python legacy agent. The Rust beta runs on a WebView-based runtime instead of Playwright, which means faster cold starts and a smaller memory footprint — but the API surface is smaller and the ecosystem of community extensions hasn't caught up yet. If you're building a new integration from scratch in mid-2026, the Rust beta is the right default. If you have existing Playwright scripts or need the full <code>browser_use</code> Python API, stick with legacy for now. The guide covers both paths with separate configuration sections.</p>
+
+      <p>LLM backbone selection is the third architectural lever. Browser Use ships with built-in support for Claude (Anthropic), GPT (OpenAI), Gemini (Google), and their own open-source <code>bu-2-0</code> model which scores 83.3% on WebVoyager with a ~60s per-task average. Claude Sonnet is the current accuracy leader at ~87%, but at roughly 3x the per-token cost of GPT-4o. For cost-sensitive batch workloads, the bu-2-0 model self-hosted via vLLM hits ~55s/task at a fraction of the API cost — perfect for overnight data extraction pipelines where a few percentage points of accuracy loss is acceptable.</p>
+
+      <pre><code class="language-python">from browser_use import Agent, Browser
+import asyncio
+from langchain_anthropic import ChatAnthropic
+
+# Self-hosted agent with custom LLM endpoint
+async def main():
+    browser = Browser(
+        headless=False,
+        user_data_dir="./profiles/agent-1"
+    )
+    llm = ChatAnthropic(
+        model="claude-sonnet-4-20250514",
+        temperature=0.0,
+    )
+    agent = Agent(
+        task="Search for the latest Browser Use release on GitHub",
+        llm=llm,
+        browser=browser,
+        use_vision=True,
+    )
+    result = await agent.run()
+    print(result)
+
+asyncio.run(main())</code></pre>
+
+      <div class="paywall">
+        <div class="paywall-locked">&#128274;</div>
+        <p><strong>Unlock the full chapter.</strong> Get the complete decision tree for Agent vs Cloud, a detailed cost comparison table across all LLM backbones, hardware sizing recommendations for single-agent to 100-agent deployments, and Rust beta migration guidance.</p>
+        <a href="/production-guide/" class="btn btn-primary">Get the Production Guide — $39</a>
+      </div>
+
+      <nav class="chapter-nav">
+        <span class="chapter-nav-placeholder">&nbsp;</span>
+        <a href="/chapters/docker-setup/">Chapter 2: Docker Production Setup →</a>
+      </nav>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+</body>
+</html>

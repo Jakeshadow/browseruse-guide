@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Detection & Stealth: Don't Let Websites Block Your Agent</title>
+  <meta name="description" content="Prevent websites from detecting and blocking your Browser Use agent. Fingerprint spoofing, residential proxies, CDP-level stealth configuration.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"></noscript>
+  <meta property="og:title" content="Anti-Detection & Stealth: Don't Let Websites Block Your Agent">
+  <meta property="og:description" content="Prevent websites from detecting and blocking your Browser Use agent. Fingerprint spoofing, residential proxies, CDP-level stealth.">
+  <meta property="og:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://runbrowseruse.com/chapters/anti-detection/">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="56" font-family="sans-serif" font-weight="bold">BU</text></svg>Browser Use Guide
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/production-guide/">Production Guide</a></li>
+        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="preview-banner">
+    Free preview. Full chapter — stealth config, proxy rotation, fingerprint testing script — in the <a href="/production-guide/">Production Guide</a>.
+  </div>
+
+  <main class="section">
+    <div class="container">
+      <h1>Anti-Detection & Stealth: Don't Let Websites Block Your Agent</h1>
+
+      <p>Your agent is running. Chrome is rendering. The LLM is making good decisions. Then, out of nowhere, Cloudflare throws a challenge page. Or the site returns a 403. Or worse — it returns a 200 with a fake "success" page that contains none of the data you're trying to scrape. Welcome to bot detection, and it's no longer just about checking the User-Agent header.</p>
+
+      <p>Modern anti-bot systems operate on three layers. Layer one is JavaScript fingerprinting: the page runs a script that measures your WebGL renderer string, canvas hash, installed fonts, screen resolution, and audio context fingerprint. These values collectively form a "browser fingerprint" that is surprisingly unique — even two identical Chrome installs on the same OS will produce different canvas hashes if their GPU drivers differ. Layer two is CDP (Chrome DevTools Protocol) detection: when you connect to Chrome via Playwright or Puppeteer, the browser exposes a <code>navigator.webdriver</code> property set to <code>true</code> and adds a "Chrome is being controlled by automated test software" infobar. Any competent anti-bot system checks these. Layer three is behavioral: real humans don't click at pixel-perfect coordinates, don't type at a constant 0ms inter-key delay, and don't navigate between pages with zero mouse movement between clicks. Behavioral analysis is the hardest to spoof because it requires per-task randomization, not just a one-time configuration change.</p>
+
+      <p>Browser Use Cloud ships with a built-in stealth layer that handles layers one and two out of the box — it consistently scores in the 90-95% range on CreepJS, the standard browser fingerprinting test suite. For self-hosted setups, you need to configure this yourself. The minimum viable stealth config has four parts: disable the automation infobar via Chrome flags, strip <code>navigator.webdriver</code> via CDP on every new page, randomize the viewport to a common resolution (don't use the default 800x600 which screams "headless bot"), and inject a stealth JavaScript payload that overrides the most commonly fingerprinted APIs before any page scripts run.</p>
+
+      <p>Proxy rotation is the fourth piece that most guides skip. Even with perfect browser fingerprinting, if all your requests come from the same datacenter IP range (AWS, GCP, DigitalOcean), sites will rate-limit or block you based on IP reputation alone. Residential proxies route your traffic through real ISP-assigned IPs, making your agent indistinguishable from a real user on a home connection. The full chapter covers proxy rotation strategies — round-robin, sticky sessions for login flows, and automatic proxy switching on Cloudflare challenge detection.</p>
+
+      <pre><code class="language-python">from browser_use import Agent, Browser, BrowserConfig
+
+# Minimum viable stealth configuration for self-hosted Browser Use
+config = BrowserConfig(
+    headless=False,
+    disable_security=True,
+    extra_chromium_args=[
+        "--disable-blink-features=AutomationControlled",
+        "--disable-features=ChromeWhatsNewUI",
+        "--exclude-switches=enable-automation",
+        "--no-first-run --no-default-browser-check",
+    ],
+    new_context_params={
+        "viewport": {"width": 1920, "height": 1080},
+        "user_agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/131.0.0.0 Safari/537.36"
+        ),
+        "locale": "en-US",
+        "timezone_id": "America/Chicago",
+    },
+)
+
+browser = Browser(config=config)
+agent = Agent(task="...", llm=llm, browser=browser)
+await agent.run()</code></pre>
+
+      <div class="paywall">
+        <div class="paywall-locked">&#128274;</div>
+        <p><strong>Unlock the full chapter.</strong> Get the complete stealth config tested against Cloudflare, Datadome, and Akamai, residential proxy rotation with automatic failover, a CreepJS fingerprint testing script, and behavioral emulation strategies (mouse movement, typing cadence, scroll patterns).</p>
+        <a href="/production-guide/" class="btn btn-primary">Get the Production Guide — $39</a>
+      </div>
+
+      <nav class="chapter-nav">
+        <a href="/chapters/headless-headful/">← Chapter 3: Headless vs Headful</a>
+        <a href="/chapters/session-management/">Chapter 5: Session Management →</a>
+      </nav>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+</body>
+</html>

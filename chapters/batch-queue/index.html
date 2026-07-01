@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch Task Queue & Concurrency: Scaling Beyond One Agent</title>
+  <meta name="description" content="Scale Browser Use to hundreds of concurrent tasks. Celery task queue integration, multi-agent concurrency pool, GPU VRAM and memory budgeting.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"></noscript>
+  <meta property="og:title" content="Batch Task Queue & Concurrency: Scaling Beyond One Agent">
+  <meta property="og:description" content="Scale Browser Use to hundreds of concurrent tasks. Celery task queue integration, multi-agent concurrency pool, resource budgeting.">
+  <meta property="og:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://runbrowseruse.com/chapters/batch-queue/">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="56" font-family="sans-serif" font-weight="bold">BU</text></svg>Browser Use Guide
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/production-guide/">Production Guide</a></li>
+        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="preview-banner">
+    Free preview. Full chapter — Celery integration code, agent pool manager, resource scheduler — in the <a href="/production-guide/">Production Guide</a>.
+  </div>
+
+  <main class="section">
+    <div class="container">
+      <h1>Batch Task Queue & Concurrency: Scaling Beyond One Agent</h1>
+
+      <p>A single Browser Use agent handles one task at a time. One Chromium instance, one LLM call chain, one output. That's fine for ad-hoc automation scripts. It's completely inadequate when you need to scrape 10,000 product pages, run a nightly data extraction pipeline across 200 URLs, or process a continuous stream of user-submitted tasks. You need a queue.</p>
+
+      <p>Celery with Redis is the most battle-tested pattern in the Python ecosystem for this exact problem. Here's how the architecture fits together: Redis acts as both the message broker (tasks go in, workers pull them out) and the result backend (agent outputs are stored until your application retrieves them). Each Celery worker process wraps a single Browser Use agent — one worker = one Chromium instance = one concurrent task. Scale horizontally by adding more workers, up to the memory limits of your host machine. Flower provides a real-time dashboard showing queue depth, worker status, task success/failure rates, and per-task execution time — essential for spotting when a particular website or task type is degrading your throughput.</p>
+
+      <p>Resource budgeting is where most scaling attempts fail. A headless Chromium instance needs roughly 500MB of RAM at steady state, spiking to 800MB during complex page loads. A headful instance (with Xvfb, see Chapter 3) needs 700MB to 1GB. If you're running a 16GB VM, you can safely run 8-12 headless agents — but only if you account for OS overhead, the Celery worker processes themselves, and the fact that Chromium never releases memory to the OS (it holds onto freed pages internally). The LLM API calls are I/O-bound, not CPU-heavy, so CPU is rarely the bottleneck. The real constraint is almost always RAM and the number of concurrent Chromium processes your kernel can handle before context switching overhead overtakes any throughput gains.</p>
+
+      <p>For GPU-accelerated deployments (e.g., running the open-source bu-2-0 model locally via vLLM), you have a second dimension to budget: VRAM. Each concurrent LLM inference stream uses a fixed amount of GPU memory based on model size and context length. The full chapter includes a budgeting worksheet that takes your target tasks-per-hour, works backward to the number of concurrent agents you need, and outputs the exact VM instance type and GPU configuration required.</p>
+
+      <pre><code class="language-python"># celery_app.py — Minimal Celery task wrapping a Browser Use agent
+from celery import Celery
+from browser_use import Agent, Browser
+from langchain_anthropic import ChatAnthropic
+import asyncio
+
+app = Celery("browser_tasks", broker="redis://localhost:6379/0")
+app.conf.result_backend = "redis://localhost:6379/0"
+app.conf.worker_concurrency = 1
+app.conf.task_acks_late = True
+
+@app.task(bind=True, max_retries=2, default_retry_delay=60)
+def run_browser_task(self, url: str, instruction: str):
+    """Run one Browser Use task. One task = one Chromium instance."""
+    async def _run():
+        browser = Browser(headless=True)
+        llm = ChatAnthropic(
+            model="claude-sonnet-4-20250514",
+            temperature=0.0,
+        )
+        agent = Agent(task=instruction, llm=llm, browser=browser)
+        result = await agent.run()
+        await browser.close()
+        return result
+
+    try:
+        return asyncio.run(_run())
+    except Exception as exc:
+        raise self.retry(exc=exc, countdown=120)</code></pre>
+
+      <div class="paywall">
+        <div class="paywall-locked">&#128274;</div>
+        <p><strong>Unlock the full chapter.</strong> Get the complete Celery + Flower production setup with Docker Compose, an agent pool manager that pre-warms Chromium instances for sub-second task dispatch, resource budgeting formulas for any VM size, and a horizontal autoscaling strategy for Kubernetes deployments.</p>
+        <a href="/production-guide/" class="btn btn-primary">Get the Production Guide — $39</a>
+      </div>
+
+      <nav class="chapter-nav">
+        <a href="/chapters/session-management/">← Chapter 5: Session Management</a>
+        <a href="/chapters/troubleshooting/">Chapter 7: Error Troubleshooting →</a>
+      </nav>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+</body>
+</html>

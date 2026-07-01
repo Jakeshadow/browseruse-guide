@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker Production Setup for Browser Use</title>
+  <meta name="description" content="Production Dockerfile and docker-compose.yml for Browser Use. Multi-stage build, Chromium dependencies, Chrome flags reference, health checks.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"></noscript>
+  <meta property="og:title" content="Docker Production Setup for Browser Use">
+  <meta property="og:description" content="Production Dockerfile and docker-compose.yml for Browser Use. Multi-stage build, Chromium dependencies, Chrome flags.">
+  <meta property="og:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://runbrowseruse.com/chapters/docker-setup/">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="56" font-family="sans-serif" font-weight="bold">BU</text></svg>Browser Use Guide
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/production-guide/">Production Guide</a></li>
+        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="preview-banner">
+    Free preview. Full chapter — production Dockerfile, docker-compose.yml, Chrome flag reference — in the <a href="/production-guide/">Production Guide</a>.
+  </div>
+
+  <main class="section">
+    <div class="container">
+      <h1>Docker Production Setup for Browser Use</h1>
+
+      <p>Running Browser Use directly on your laptop works fine — until it doesn't. The moment you need reproducible builds, multiple concurrent agents, or deployment to a CI pipeline, Docker stops being optional. It solves three concrete problems: dependency isolation (no more "works on my machine"), resource containment (Chromium memory leaks don't take down your entire server), and horizontal scaling (spin up N identical agent containers with one command).</p>
+
+      <p>The hard part isn't Docker itself — it's Chromium inside Docker. Chrome expects a real display server, real GPU drivers, and a real user namespace. Inside a container, none of those exist by default. The three flags you will see in every working Browser Use Docker setup are: <code>--no-sandbox</code> (disables the SUID sandbox, required because containers run as root by default), <code>--disable-dev-shm-usage</code> (forces Chrome to use <code>/tmp</code> instead of <code>/dev/shm</code>, which Docker limits to 64MB by default), and <code>--disable-gpu</code> (skips GPU initialization entirely). Without these three flags, Chrome will either crash on startup or hang silently. This is exactly what GitHub Issue #2513 documents — dozens of users with perfectly working local setups that break the moment they go into Docker, all because of missing Chrome flags and insufficient shared memory.</p>
+
+      <p>A production Dockerfile benefits from a multi-stage build. Stage one installs all build dependencies — Python packages, Playwright browsers, system libraries — and produces a cache-heavy layer you never ship. Stage two copies only the runtime artifacts: the virtual environment, the Playwright browser binaries, and your application code. The result is an image that's 30-40% smaller than a single-stage build and doesn't carry build tooling that an attacker could exploit. For the Playwright browsers specifically, use <code>playwright install-deps chromium</code> in the build stage to pull in the exact system library versions Chromium needs, then copy <code>~/.cache/ms-playwright</code> to the final stage.</p>
+
+      <p>The health check matters more than you think. Chromium can appear to be running while its renderer process has crashed. A simple <code>curl http://localhost:9222/json/version</code> against Chrome's DevTools debugging port tells you whether the browser is actually alive and accepting connections. Run this on a 30-second interval with a 10-second timeout to catch silent failures before your task queue feeds work to a dead agent.</p>
+
+      <pre><code class="language-yaml"># docker-compose.yml — Browser Use agent with health check
+version: "3.9"
+services:
+  browser-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    shm_size: "2gb"
+    environment:
+      - DISPLAY=:99
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    ports:
+      - "9222:9222"
+    volumes:
+      - ./profiles:/app/profiles
+      - ./tasks:/app/tasks
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9222/json/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped</code></pre>
+
+      <div class="paywall">
+        <div class="paywall-locked">&#128274;</div>
+        <p><strong>Unlock the full chapter.</strong> Get the complete production Dockerfile with multi-stage build, full Chrome flag reference with explanations, docker-compose.yml with Xvfb sidecar, and a debugging checklist for the 5 most common Docker-specific failures.</p>
+        <a href="/production-guide/" class="btn btn-primary">Get the Production Guide — $39</a>
+      </div>
+
+      <nav class="chapter-nav">
+        <a href="/chapters/architecture/">← Chapter 1: Architecture</a>
+        <a href="/chapters/headless-headful/">Chapter 3: Headless vs Headful →</a>
+      </nav>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+</body>
+</html>

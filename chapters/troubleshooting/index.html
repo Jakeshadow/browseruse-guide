@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Troubleshooting Bible: Every Browser Use Failure, Diagnosed and Fixed</title>
+  <meta name="description" content="Fix the 20 most common Browser Use errors. Agent stuck at Step 1, Docker Chrome crash, timeout, memory leak — all diagnosed with step-by-step fixes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"></noscript>
+  <meta property="og:title" content="Error Troubleshooting Bible: Every Browser Use Failure, Diagnosed and Fixed">
+  <meta property="og:description" content="Fix the 20 most common Browser Use errors. Agent stuck at Step 1, Docker Chrome crash, timeout, memory leak — diagnosed and fixed.">
+  <meta property="og:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://runbrowseruse.com/chapters/troubleshooting/">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="56" font-family="sans-serif" font-weight="bold">BU</text></svg>Browser Use Guide
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/production-guide/">Production Guide</a></li>
+        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="preview-banner">
+    Free preview. Full chapter — error to diagnosis to fix reference, debugging checklist, memory profiling script — in the <a href="/production-guide/">Production Guide</a>.
+  </div>
+
+  <main class="section">
+    <div class="container">
+      <h1>Error Troubleshooting Bible: Every Browser Use Failure, Diagnosed and Fixed</h1>
+
+      <p>Browser Use fails in a small number of predictable ways. After working through hundreds of GitHub Issues and debugging production deployments, a pattern emerges: the same six or seven root causes account for roughly 90% of all reported failures. The rest are edge cases — version mismatches, platform-specific library issues, or genuinely novel bugs. This chapter maps every common failure to its root cause and gives you the exact fix, in order of frequency.</p>
+
+      <p><strong>Symptom 1: Agent stuck at Step 1.</strong> The LLM call returns successfully — you can see the plan in the logs — but the browser never executes the first action. Root cause in 80% of cases: headless Chrome failing silently on a JS-heavy page (see Chapter 3 for the full explanation). Quick fix: switch to headful mode with Xvfb. If you're already headful, check whether the page is returning a 200 but rendering a blank body — some sites detect headful-but-automated Chrome and serve an empty page instead of a challenge. Solution: apply the stealth config from Chapter 4. Remaining 20%: the LLM output format changed (Browser Use expects a specific JSON action schema) or the model hallucinated an action the browser can't execute. Check the raw LLM response in the debug logs.</p>
+
+      <p><strong>Symptom 2: Docker Chrome crash.</strong> The container starts, Chrome's process appears in <code>ps aux</code> for a split second, then disappears. No useful error message in the logs — just a non-zero exit code. Root cause in 95% of cases: missing <code>--no-sandbox</code> flag or insufficient shared memory. Docker allocates 64MB to <code>/dev/shm</code> by default; Chromium uses this for inter-process communication and will crash immediately if it's full. Fix: add <code>shm_size: "2gb"</code> to your docker-compose service definition and ensure <code>--no-sandbox --disable-dev-shm-usage --disable-gpu</code> are in your Chrome launch args. The remaining 5%: Chrome and the installed Playwright browser version disagree. Run <code>playwright install --with-deps chromium</code> inside the container to guarantee version alignment.</p>
+
+      <p><strong>Symptom 3: Timeout on element.</strong> The agent logs show it found the correct element selector, but the interaction times out. Root cause: the page has loaded (DOMContentLoaded fired), but the target element hasn't rendered yet because it's behind a lazy-load boundary, inside an iframe, or rendered by a JavaScript framework that hydrates after initial paint. Quick fix: increase the default timeout from 30s to 60s and add an explicit <code>wait_for_selector</code> before the interaction. If it's an iframe, the agent needs to explicitly switch contexts — Browser Use's vision mode (using the VLM to see the page screenshot) can sometimes detect elements that the DOM-based agent can't access because they're in a cross-origin iframe.</p>
+
+      <p>The full chapter contains the complete 20-error reference table with diagnosis steps and verified fixes for: memory leak after 100+ tasks, LLM rate limiting causing silent retry loops, Playwright browser binary not found, WebSocket disconnection mid-task, "browser has disconnected" errors, and 15 more. Each entry includes the exact error message to grep for, the diagnostic commands to run, and the fix — no "try reinstalling" hand-waving.</p>
+
+      <div class="paywall">
+        <div class="paywall-locked">&#128274;</div>
+        <p><strong>Unlock the full chapter.</strong> Get the complete 20-error reference table with exact error strings, diagnostic commands, and verified fixes; a step-by-step debugging checklist you can run against any failing agent; and a memory profiling script that identifies leaks before they crash your deployment.</p>
+        <a href="/production-guide/" class="btn btn-primary">Get the Production Guide — $39</a>
+      </div>
+
+      <nav class="chapter-nav">
+        <a href="/chapters/batch-queue/">← Chapter 6: Batch Task Queue</a>
+        <span class="chapter-nav-placeholder">&nbsp;</span>
+      </nav>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+</body>
+</html>

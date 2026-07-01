@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Headless vs Headful: When Browser Use's Agent Goes Silent</title>
+  <meta name="description" content="Fix Browser Use agent stuck at Step 1. Headless Chromium debugging, Xvfb virtual display setup, headful vs headless performance comparison.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"></noscript>
+  <meta property="og:title" content="Headless vs Headful: When Browser Use's Agent Goes Silent">
+  <meta property="og:description" content="Fix Browser Use agent stuck at Step 1. Headless Chromium debugging, Xvfb virtual display setup, headful vs headless performance comparison.">
+  <meta property="og:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://runbrowseruse.com/chapters/headless-headful/">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="56" font-family="sans-serif" font-weight="bold">BU</text></svg>Browser Use Guide
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/production-guide/">Production Guide</a></li>
+        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="preview-banner">
+    Free preview. Full chapter — Xvfb setup, headless debugging, cost/performance trade-off table — in the <a href="/production-guide/">Production Guide</a>.
+  </div>
+
+  <main class="section">
+    <div class="container">
+      <h1>Headless vs Headful: When Browser Use's Agent Goes Silent</h1>
+
+      <p>You launch your agent. The logs show the LLM call succeeded. The agent reports "Step 1 completed." But nothing actually happened — the page never loaded, the element was never clicked. No error. No crash. Just silence. This is the most common Browser Use production failure mode, and nine times out of ten, it's headless Chrome.</p>
+
+      <p>Headless mode skips the entire GPU rendering pipeline. For most static pages this is fine — the DOM still loads, JavaScript still executes. But modern JS-heavy sites (anything built with React, Next.js, or behind Cloudflare) increasingly rely on WebGL fingerprinting, canvas rendering, and Intersection Observer APIs that depend on a real viewport with actual pixel dimensions. In headless mode, these APIs either return null or produce subtly different values that trigger the page's bot detection heuristics. The page loads, but it loads a degraded version that doesn't match what the Browser Use agent's LLM expects to see — so the agent waits for an element that never renders.</p>
+
+      <p>The fix is a virtual display. Xvfb (X Virtual Framebuffer) creates a fake screen in memory that Chrome renders to exactly as it would on a real monitor. Pair it with a lightweight window manager like Fluxbox, and Chrome has everything it expects: a display server, window decorations, and correct screen geometry. The agent now runs in "headful" mode — Chrome thinks it's on a real desktop, so every JS API works correctly — but there's no physical monitor attached. The cost: roughly 200MB more RAM per agent compared to pure headless mode. For a single-agent deployment this is negligible. At 10+ concurrent agents, it adds up — but it's still cheaper than debugging silent failures in production.</p>
+
+      <p>The trade-off between headless and headful is ultimately about failure modes. Headless fails silently — your agent reports success while accomplishing nothing. Headful fails visibly — if the browser crashes, you can VNC into the virtual display and see exactly what happened. For production pipelines where each task costs real money (LLM API calls, proxy bandwidth, engineering time), the extra 200MB of RAM is the cheapest insurance you can buy.</p>
+
+      <pre><code class="language-bash"># Start Xvfb on virtual display :99 (1920x1080, 24-bit color)
+Xvfb :99 -screen 0 1920x1080x24 &
+
+# Optional: start a lightweight window manager for proper window behavior
+fluxbox -display :99 &
+
+# Tell Chrome to use the virtual display
+export DISPLAY=:99
+
+# Now launch your Browser Use agent — it runs headful on the virtual screen
+python agent.py</code></pre>
+
+      <div class="paywall">
+        <div class="paywall-locked">&#128274;</div>
+        <p><strong>Unlock the full chapter.</strong> Get the complete Xvfb + Fluxbox Docker Compose sidecar setup, VNC debugging configuration, headless vs headful benchmark data across 50 real-world websites, and a decision matrix for when each mode is appropriate.</p>
+        <a href="/production-guide/" class="btn btn-primary">Get the Production Guide — $39</a>
+      </div>
+
+      <nav class="chapter-nav">
+        <a href="/chapters/docker-setup/">← Chapter 2: Docker Setup</a>
+        <a href="/chapters/anti-detection/">Chapter 4: Anti-Detection →</a>
+      </nav>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+</body>
+</html>

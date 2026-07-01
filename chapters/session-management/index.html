@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Management: Persistent State Across Agent Runs</title>
+  <meta name="description" content="Persist cookies, local storage, and browser profiles across Browser Use agent runs. S3-backed session storage, snapshot and restore automation.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"></noscript>
+  <meta property="og:title" content="Session Management: Persistent State Across Agent Runs">
+  <meta property="og:description" content="Persist cookies, local storage, and browser profiles across Browser Use agent runs. S3-backed session storage, snapshot and restore automation.">
+  <meta property="og:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://runbrowseruse.com/chapters/session-management/">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="56" font-family="sans-serif" font-weight="bold">BU</text></svg>Browser Use Guide
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/production-guide/">Production Guide</a></li>
+        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="preview-banner">
+    Free preview. Full chapter — S3 session storage, snapshot/restore scripts, multi-tab switching — in the <a href="/production-guide/">Production Guide</a>.
+  </div>
+
+  <main class="section">
+    <div class="container">
+      <h1>Session Management: Persistent State Across Agent Runs</h1>
+
+      <p>Every time Browser Use launches a fresh Chromium instance, you start from zero. No cookies. No localStorage. No authenticated sessions. If your agent workflow involves logging into a SaaS dashboard, checking an email inbox, or pulling data from a service that requires authentication, that login step has to happen on every. single. run. That's not just wasteful — it's a reliability risk. Login flows are among the most fragile browser automation tasks: a changed button selector, a newly added 2FA prompt, or a CAPTCHA challenge can break your entire pipeline.</p>
+
+      <p>The solution is the Chromium user data directory. Chrome stores everything that defines a "session" — cookies, local storage, IndexedDB, service worker registrations, extension state — in a single directory on disk. When you provide a <code>user_data_dir</code> to Browser Use's <code>Browser</code> class, Chromium picks up exactly where it left off. Cookie-based sessions persist. OAuth tokens in localStorage persist. Even the browser cache persists, which speeds up repeat visits to the same domains. In Docker, you mount this directory as a volume so it survives container restarts.</p>
+
+      <p>But persistence on a single machine isn't enough for production. If your agent runs on an autoscaling group or a Kubernetes cluster, containers come and go. The user data directory needs to be portable. The pattern: before each agent run, download the latest profile snapshot from S3 (or any object store). After each run, upload the updated profile back. This is essentially a poor man's stateful workload on stateless infrastructure. For multi-agent deployments, add a simple lock file in S3 so two agents don't try to use the same profile simultaneously.</p>
+
+      <p>A word on security: a Chromium user data directory contains every cookie and token from every site the agent has visited. In the wrong hands, this is a session hijacking goldmine. Encrypt the profile data at rest — either with S3 server-side encryption (a one-line bucket configuration) or with client-side AES-256 before upload. The full chapter covers encryption in detail, including a script that handles encryption, compression, and upload in a single pipeline.</p>
+
+      <pre><code class="language-bash">#!/bin/bash
+# Session snapshot/restore for Browser Use agent profiles
+# Usage: ./session.sh save agent-1   OR   ./session.sh restore agent-1
+
+PROFILE_DIR="./profiles/$2"
+S3_BUCKET="s3://browser-use-sessions/$2"
+PROFILE_ARCHIVE="/tmp/$2-profile.tar.gz"
+S3_LOCK="s3://browser-use-sessions/$2/.lock"
+
+case "$1" in
+  save)
+    # Wait for agent to release lock (written by agent on clean exit)
+    tar -czf "$PROFILE_ARCHIVE" -C "$PROFILE_DIR" .
+    aws s3 cp "$PROFILE_ARCHIVE" "$S3_BUCKET/profile.tar.gz" --sse AES256
+    aws s3 rm "$S3_LOCK"
+    rm "$PROFILE_ARCHIVE"
+    echo "Session saved and lock released."
+    ;;
+  restore)
+    aws s3 cp "$S3_BUCKET/profile.tar.gz" "$PROFILE_ARCHIVE" 2>/dev/null
+    if [ $? -eq 0 ]; then
+      mkdir -p "$PROFILE_DIR"
+      tar -xzf "$PROFILE_ARCHIVE" -C "$PROFILE_DIR"
+      rm "$PROFILE_ARCHIVE"
+      echo "Session restored from S3."
+    else
+      echo "No existing session. Starting fresh."
+    fi
+    ;;
+esac</code></pre>
+
+      <div class="paywall">
+        <div class="paywall-locked">&#128274;</div>
+        <p><strong>Unlock the full chapter.</strong> Get the complete session manager with S3 lock coordination, AES-256 client-side encryption, multi-tab context switching for agents that need multiple simultaneous authenticated sessions, and a profile health checker that detects corrupted sessions before they break your pipeline.</p>
+        <a href="/production-guide/" class="btn btn-primary">Get the Production Guide — $39</a>
+      </div>
+
+      <nav class="chapter-nav">
+        <a href="/chapters/anti-detection/">← Chapter 4: Anti-Detection</a>
+        <a href="/chapters/batch-queue/">Chapter 6: Batch Task Queue →</a>
+      </nav>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+</body>
+</html>
