@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Use Production Guide — $39 One-Time, Lifetime Updates</title>
+  <meta name="description" content="7-chapter production guide for self-hosting Browser Use. Docker Compose, headless Chromium, anti-detection, batch queues. $39 one-time. 30-day money-back guarantee.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"></noscript>
+  <meta property="og:title" content="Browser Use Production Guide — $39 One-Time, Lifetime Updates">
+  <meta property="og:description" content="7-chapter production guide for self-hosting Browser Use. Docker Compose, headless Chromium, anti-detection, batch queues. $39 one-time. 30-day money-back guarantee.">
+  <meta property="og:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://runbrowseruse.com/production-guide/">
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+  <script>
+    Paddle.Initialize({
+      token: "LIVE_TOKEN_PLACEHOLDER",
+      environment: "production",
+      checkout: {
+        settings: {
+          displayMode: "overlay",
+          theme: "light",
+          locale: "auto",
+          successUrl: "https://runbrowseruse.com/thanks/?_ptxn={transaction_id}"
+        }
+      }
+    });
+  </script>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="56" font-family="sans-serif" font-weight="bold">BU</text></svg>Browser Use Guide
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/production-guide/">Production Guide</a></li>
+        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main>
+  <section class="hero">
+    <div class="container">
+      <p class="hero-badge">Production Guide</p>
+      <h1>Browser Use: From Local Script to Production</h1>
+      <p class="hero-subtitle">7 chapters. Docker to batch queues. Everything the official docs don't cover about self-hosting Browser Use.</p>
+      <button class="btn-buy paddle-btn" data-price-id="PRICE_ID_PLACEHOLDER">Buy Now — $39</button>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <h3 style="color:var(--accent);">Chapter 1: Architecture & Component Selection</h3>
+      <p class="section-lead">Open-source Agent vs Cloud API — which actually fits your use case?</p>
+      <p><strong>What you'll get:</strong></p>
+      <ul style="margin-left:20px;line-height:2;">
+        <li>Decision tree: self-hosted vs Cloud API</li>
+        <li>Cost comparison table (self-hosted vs Cloud at 100/1K/10K tasks/month)</li>
+        <li>LLM/VLM backbone selection (Claude, GPT, Gemini, bu-2-0)</li>
+        <li>Hardware sizing guide (RAM/VRAM/CPU per agent)</li>
+      </ul>
+      <p style="margin-top:12px;"><a href="/chapters/architecture/">Read free preview →</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h3 style="color:var(--accent);">Chapter 2: Docker Production Setup</h3>
+      <p class="section-lead">"Docker doesn't work at all but locally it's fine" — GitHub Issue #2513, solved.</p>
+      <p><strong>What you'll get:</strong></p>
+      <ul style="margin-left:20px;line-height:2;">
+        <li>Multi-layer production Dockerfile</li>
+        <li>docker-compose.yml with agent + Chromium + model API services</li>
+        <li>Complete Chrome flags reference table</li>
+        <li>Health checks, resource limits, volume mounts for model caching</li>
+      </ul>
+      <p style="margin-top:12px;"><a href="/chapters/docker-setup/">Read free preview →</a></p>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <h3 style="color:var(--accent);">Chapter 3: Headless vs Headful</h3>
+      <p class="section-lead">Agent stuck at Step 1 and you can't see why. When headless fails.</p>
+      <p><strong>What you'll get:</strong></p>
+      <ul style="margin-left:20px;line-height:2;">
+        <li>Full Xvfb + Fluxbox virtual desktop setup</li>
+        <li>Headless debugging techniques for silent failures</li>
+        <li>Cost/performance trade-off table (headless vs headful)</li>
+        <li>VNC access for remote debugging</li>
+      </ul>
+      <p style="margin-top:12px;"><a href="/chapters/headless-headful/">Read free preview →</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h3 style="color:var(--accent);">Chapter 4: Anti-Detection & Stealth</h3>
+      <p class="section-lead">Websites block your agent. Fingerprint spoofing, proxies, CDP-level stealth.</p>
+      <p><strong>What you'll get:</strong></p>
+      <ul style="margin-left:20px;line-height:2;">
+        <li>Complete stealth configuration for self-hosted</li>
+        <li>Residential proxy integration (Bright Data, Oxylabs)</li>
+        <li>CDP-level Playwright fingerprint removal</li>
+        <li>CreepJS testing methodology + stealth verification</li>
+      </ul>
+      <p style="margin-top:12px;"><a href="/chapters/anti-detection/">Read free preview →</a></p>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <h3 style="color:var(--accent);">Chapter 5: Session Management</h3>
+      <p class="section-lead">Re-logging into every service on every run is a dealbreaker. Fix it.</p>
+      <p><strong>What you'll get:</strong></p>
+      <ul style="margin-left:20px;line-height:2;">
+        <li>S3-backed session persistence setup</li>
+        <li>Snapshot and restore automation scripts</li>
+        <li>Multi-tab context switching</li>
+        <li>Cookie encryption at rest</li>
+      </ul>
+      <p style="margin-top:12px;"><a href="/chapters/session-management/">Read free preview →</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h3 style="color:var(--accent);">Chapter 6: Batch Task Queue & Concurrency</h3>
+      <p class="section-lead">One agent won't cut it. Scale to hundreds of concurrent browser tasks.</p>
+      <p><strong>What you'll get:</strong></p>
+      <ul style="margin-left:20px;line-height:2;">
+        <li>Full Celery integration with Browser Use</li>
+        <li>Multi-agent concurrency pool manager</li>
+        <li>GPU VRAM + CPU + memory budget calculator</li>
+        <li>Monitoring with Flower + retry/dead-letter strategies</li>
+      </ul>
+      <p style="margin-top:12px;"><a href="/chapters/batch-queue/">Read free preview →</a></p>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <h3 style="color:var(--accent);">Chapter 7: Error Troubleshooting Bible</h3>
+      <p class="section-lead">Every common Browser Use failure, diagnosed and fixed.</p>
+      <p><strong>What you'll get:</strong></p>
+      <ul style="margin-left:20px;line-height:2;">
+        <li>Complete error reference (20+ entries with diagnosis + fix)</li>
+        <li>Debugging checklist for production incidents</li>
+        <li>Memory profiling and Chromium orphan process cleanup</li>
+        <li>Docker-specific debugging commands</li>
+      </ul>
+      <p style="margin-top:12px;"><a href="/chapters/troubleshooting/">Read free preview →</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="price-block">
+        <p class="badge badge-green">Launch Special</p>
+        <div class="price"><span style="text-decoration:line-through;color:var(--gray-500);font-size:1.8rem;font-weight:400;">$59</span> <span style="color:var(--google-green);">$39</span></div>
+        <div class="price-note">One-time payment. Lifetime updates. <span style="color:var(--accent);">· tax included</span></div>
+        <button class="btn-buy paddle-btn" data-price-id="PRICE_ID_PLACEHOLDER">Get the Production Guide — $39</button>
+        <p style="font-size:.9rem;color:var(--accent);font-weight:500;margin-top:16px;">&#128274; 30-day money-back guarantee</p>
+      </div>
+      <p style="text-align:center;margin-top:8px;font-size:0.85rem;color:var(--text-secondary);">Also available: <strong>$19 Upgrade Pack</strong> — Celery batch queue code + anti-detection configuration scripts</p>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container" style="text-align:center;">
+      <h2>30-Day Money-Back Guarantee</h2>
+      <p class="section-lead" style="max-width:600px;margin:0 auto;">If this guide doesn't save you at least 20 hours of production debugging, email us within 30 days for a full refund. No questions asked.</p>
+    </div>
+  </section>
+</main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+</body>
+</html>
