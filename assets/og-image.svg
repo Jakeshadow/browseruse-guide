@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+  <rect x="0" y="0" width="1200" height="8" fill="#10b981"/>
+  <text x="600" y="260" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="44" font-weight="bold" fill="#e2e8f0">Browser Use — Production Deployment</text>
+  <text x="600" y="330" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="52" font-weight="bold" fill="#10b981">100K Stars. Zero Production Guides.</text>
+  <text x="600" y="410" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="28" fill="#94a3b8">Docker, Headless, Anti-Detection, Batch Queues</text>
+  <text x="600" y="560" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#10b981">runbrowseruse.com</text>
+</svg>
