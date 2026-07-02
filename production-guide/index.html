@@ -25,8 +25,9 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="canonical" href="https://runbrowseruse.com/production-guide/">
-  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js" defer></script>
   <script>
+document.addEventListener('DOMContentLoaded', function() {
     Paddle.Initialize({
       token: "live_ce00442faf7f18c3f065320ce95",
       environment: "production",
@@ -39,6 +40,7 @@
         }
       }
     });
+});
   </script>
   <script type="application/ld+json">
   {
@@ -221,11 +223,13 @@
       <p class="section-lead" style="max-width:600px;margin:0 auto;">If this guide doesn't save you at least 20 hours of production debugging, email us within 30 days for a full refund. No questions asked.</p>
     </div>
   </section>
+<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;">Last updated: July 3, 2026</p>
 </main>
 
   <footer class="footer">
     <div class="container">
       <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p style="margin-top:.5rem;">By <strong>Luke Wang</strong> — Browser Use production deployment researcher. <a href="mailto:browseruse-guide@proton.me">browseruse-guide@proton.me</a></p>
       <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
     </div>
   </footer>

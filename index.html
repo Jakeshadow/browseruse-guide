@@ -50,8 +50,9 @@
     ]
   }
   </script>
-  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js" defer></script>
   <script>
+document.addEventListener('DOMContentLoaded', function() {
     Paddle.Initialize({
       token: "live_ce00442faf7f18c3f065320ce95",
       environment: "production",
@@ -64,6 +65,7 @@
         }
       }
     });
+});
   </script>
   <script type="application/ld+json">
   {
@@ -146,38 +148,38 @@
       <div class="container">
         <h2>What This Guide Covers</h2>
         <p class="section-lead">Seven chapters. Each solves a problem that GitHub Issues is full of — and the official docs don't cover.</p>
-        <div class="chapters-grid">
-          <div class="chapter-card">
+        <ol class="chapters-grid">
+          <li class="chapter-card">
             <h3>1. Architecture & Component Selection</h3>
             <p>Open-source Agent vs Cloud API — which actually fits your use case? LLM backbone, Rust beta vs Python legacy, VLM requirements.</p>
             <p><small>You'll get: Decision tree, cost comparison table, hardware sizing guide</small></p>
           </div>
-          <div class="chapter-card">
+          <li class="chapter-card">
             <h3>2. Docker Production Setup</h3>
             <p>"Docker doesn't work at all but locally it's fine" — GitHub Issue #2513. Multi-layer Dockerfile, Compose config, Chromium flags that actually work.</p>
             <p><small>You'll get: Production Dockerfile, docker-compose.yml, Chrome flag reference</small></p>
           </div>
-          <div class="chapter-card">
+          <li class="chapter-card">
             <h3>3. Headless vs Headful</h3>
             <p>Agent stuck at Step 1 and you can't see why. When headless fails, Xvfb + Fluxbox virtual desktop is the answer.</p>
             <p><small>You'll get: Headless debugging techniques, Xvfb setup, cost/performance trade-off</small></p>
           </div>
-          <div class="chapter-card">
+          <li class="chapter-card">
             <h3>4. Anti-Detection & Stealth</h3>
             <p>Websites block your agent. Fingerprint spoofing, residential proxy integration, CDP-level Playwright fingerprint removal.</p>
             <p><small>You'll get: Stealth configuration, proxy rotation setup, fingerprint testing script</small></p>
           </div>
-          <div class="chapter-card">
+          <li class="chapter-card">
             <h3>5. Session Management</h3>
             <p>Re-logging into every service on every run is a dealbreaker. Cookie persistence, session snapshots, replay.</p>
             <p><small>You'll get: S3-backed session storage, snapshot/restore scripts, multi-tab context switching</small></p>
           </div>
-          <div class="chapter-card">
+          <li class="chapter-card">
             <h3>6. Batch Task Queue & Concurrency</h3>
             <p>One agent won't cut it. Celery/RQ task queue, multi-agent concurrency pool, GPU VRAM + CPU + memory budget.</p>
             <p><small>You'll get: Celery integration code, agent pool manager, resource scheduler</small></p>
           </div>
-          <div class="chapter-card">
+          <li class="chapter-card">
             <h3>7. Error Troubleshooting Bible</h3>
             <p>"Agent stuck at Step 1", "Timeout on element", "Memory leak after 100 tasks" — every common failure, diagnosed and fixed.</p>
             <p><small>You'll get: Error→diagnosis→fix reference, debugging checklist, memory profiling script</small></p>
@@ -256,11 +258,13 @@
         </div>
       </div>
     </section>
+  <p style="color:var(--text-muted);font-size:0.85rem;text-align:center;">Last updated: July 3, 2026</p>
   </main>
 
   <footer class="footer">
     <div class="container">
       <p>Unofficial community resource. Not affiliated with Browser Use Inc. or Y Combinator. <a href="https://github.com/browser-use/browser-use">Official Browser Use repo</a>.</p>
+      <p style="margin-top:.5rem;">By <strong>Luke Wang</strong> — Browser Use production deployment researcher. <a href="mailto:browseruse-guide@proton.me">browseruse-guide@proton.me</a></p>
       <p><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
     </div>
   </footer>
