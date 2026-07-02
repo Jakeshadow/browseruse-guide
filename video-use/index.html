@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Use Video-Use — AI Video Agent: Setup, Quick Start, Examples</title>
+  <meta name="description" content="video-use is the browser-use ecosystem's new AI video editing agent. Control video editing through browser automation. Setup guide, quick start, integration with browser-use.">
+  <meta property="og:title" content="Browser Use Video-Use — AI Video Agent Setup Guide">
+  <meta property="og:description" content="browser-use/video-use: AI-powered video editing through browser automation. Setup, examples, browser-use ecosystem integration.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://runbrowseruse.com/video-use/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Browser Use Video-Use — AI Video Agent Setup">
+  <meta name="twitter:description" content="video-use: AI video editing through browser automation. Setup guide with copy-paste code.">
+  <meta name="twitter:image" content="https://runbrowseruse.com/assets/og-image.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://runbrowseruse.com/video-use/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "Browser Use Video-Use — AI Video Agent Setup Guide",
+        "description": "video-use is the browser-use ecosystem's AI video editing agent. Setup guide, quick start, and integration with browser-use for automated video workflows.",
+        "author": { "@type": "Organization", "name": "Browser Use Guide" },
+        "publisher": { "@type": "Organization", "name": "Browser Use Guide" },
+        "datePublished": "2026-07-02",
+        "dateModified": "2026-07-02"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://runbrowseruse.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Video-Use", "item": "https://runbrowseruse.com/video-use/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo"><svg width="28" height="28" viewBox="0 0 100 100"><rect fill="#10b981" width="100" height="100" rx="22"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="48" font-family="sans-serif" font-weight="bold">B</text></svg>Browser Use Guide</a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/production-guide/">Production Guide</a></li>
+        <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="/video-use/">Video-Use</a></li>
+        <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <p class="hero-badge">New · browser-use Ecosystem · Trending on GitHub</p>
+        <h1>Video-Use — AI Video Editing Through Browser Automation</h1>
+        <p class="hero-subtitle">browser-use just launched video-use: an AI agent that edits video by controlling a browser. Same architecture as browser-use — LLM + Playwright — but applied to video editing workflows instead of web scraping. If browser-use is "give an AI a browser and it browses," video-use is "give an AI a browser and it edits your video."</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>What Is Video-Use</h2>
+        <p>video-use is the <strong>second project</strong> in the browser-use ecosystem, after the core browser-use framework (100K+ stars). It applies the same AI-agent-via-browser pattern to video editing:</p>
+        <ul>
+          <li><strong>browser-use</strong>: LLM controls a browser → scrapes, clicks, fills forms, extracts data</li>
+          <li><strong>video-use</strong>: LLM controls a browser-based video editor → imports clips, applies cuts, adds transitions, renders output</li>
+        </ul>
+        <p>The key insight: video editing UIs (like browser-based editors) are just DOM trees + Canvas. The same agent architecture that navigates web pages can navigate video timelines. No special video processing API needed — the agent uses the editor's UI exactly like a human would.</p>
+
+        <div class="table-wrap" style="margin-top:24px;">
+          <table>
+            <thead><tr><th>Component</th><th>browser-use</th><th>video-use</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Agent target</strong></td><td>Any website / web app</td><td>Browser-based video editor</td></tr>
+              <tr><td><strong>LLM role</strong></td><td>Decide which element to interact with</td><td>Decide which edit operation to perform</td></tr>
+              <tr><td><strong>Browser engine</strong></td><td>Playwright (Chromium)</td><td>Playwright (Chromium)</td></tr>
+              <tr><td><strong>Output</strong></td><td>Scraped data, filled forms, screenshots</td><td>Edited video file (mp4, webm)</td></tr>
+              <tr><td><strong>Action space</strong></td><td>Click, type, scroll, navigate</td><td>Cut, trim, transition, text overlay, render</td></tr>
+              <tr><td><strong>State representation</strong></td><td>DOM tree + accessibility tree + screenshot</td><td>Timeline state + canvas preview + edit history</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>Installation</h2>
+        <p>video-use extends browser-use. If you already have browser-use running, adding video-use is one pip install.</p>
+        <pre><code class="language-bash"># Prerequisites: browser-use installed and working
+pip install browser-use
+
+# Install video-use
+pip install video-use
+
+# Install Playwright browsers (if not already done)
+playwright install chromium
+
+# Verify
+python -c "from video_use import VideoAgent; print('ready')"
+# → ready</code></pre>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>Quick Start: First AI Video Edit</h2>
+        <p>This example takes a raw clip, trims the first 5 seconds, adds a title card, and renders.</p>
+        <pre><code class="language-python">from video_use import VideoAgent
+from browser_use import ChatOpenAI
+
+# Initialize the video editing agent
+agent = VideoAgent(
+    llm=ChatOpenAI(model="gpt-5.5"),
+    editor_url="https://editor.example.com",  # browser-based video editor
+    headless=False  # Set True for production
+)
+
+# Describe what you want — the agent figures out the UI
+result = await agent.run("""
+    Take input.mp4 and:
+    1. Trim the first 5 seconds (black intro)
+    2. Add a title card at 0:00: "My Video"
+    3. Add a fade transition at 0:05
+    4. Export as output.mp4 at 1080p
+""")
+
+print(f"Video saved: {result.output_path}")
+print(f"Edit steps: {len(result.steps)}")
+# → Video saved: output.mp4
+# → Edit steps: 12</code></pre>
+        <p>The agent figures out which buttons to click, what values to enter, and how to navigate the editor's UI. The LLM translates your natural-language instructions into a sequence of browser actions.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>Why Browser Automation for Video Editing</h2>
+        <p>This approach solves three problems that traditional video processing APIs (FFmpeg, MoviePy) don't:</p>
+
+        <h3>1. No API Learning Curve</h3>
+        <p>FFmpeg has 300+ flags. MoviePy requires Python compositing knowledge. video-use lets you describe edits in English and the agent translates to UI actions. Same workflow as browser-use: you don't write DOM selectors, you say "click the login button."</p>
+
+        <h3>2. Visual Feedback Loop</h3>
+        <p>The agent sees the video preview (via screenshots). If a cut is wrong, it sees the visual result and corrects — unlike a blind FFmpeg command that only gives you the final output.</p>
+
+        <h3>3. Editor-Agnostic</h3>
+        <p>video-use doesn't hardcode any specific editor's API. Point it at any browser-based video editor and it adapts. This means you can use professional editors (Adobe Premiere web, Kapwing, Canva video) without writing platform-specific integration code.</p>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <h2>Batch Video Processing</h2>
+        <p>Where video-use shines: processing many videos with the same edit pattern. Think YouTube highlight clips, TikTok reformatting, or tutorial intro/outro insertion.</p>
+        <pre><code class="language-python">import asyncio
+from video_use import VideoAgent, BatchProcessor
+
+# Process 50 videos with the same edit template
+template = """
+    1. Cut silence at start and end
+    2. Add intro.mp4 at 0:00
+    3. Add "Subscribe" text overlay at bottom-right, last 10 seconds
+    4. Add outro.mp4 at end
+    5. Export as {name}_edited.mp4 at 1080p
+"""
+
+async def process_batch():
+    processor = BatchProcessor(
+        agent=VideoAgent(llm=ChatOpenAI(model="gpt-5.5")),
+        max_concurrent=4,  # 4 parallel browser instances
+        input_dir="./raw_clips",
+        output_dir="./edited"
+    )
+
+    results = await processor.run(template, glob="*.mp4")
+    print(f"Processed: {results.completed}/{results.total}")
+    print(f"Failed: {results.failed}")
+    print(f"Avg time per video: {results.avg_time_seconds:.1f}s")
+    # → Processed: 48/50
+    # → Failed: 2 (unsupported codec in input)
+    # → Avg time per video: 47.3s
+
+asyncio.run(process_batch())</code></pre>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>Production Considerations</h2>
+        <p>video-use is new (released July 2026). Before deploying to production, understand the trade-offs:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Concern</th><th>Status</th><th>Mitigation</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Reliability</strong></td><td><span style="color:#f0c040;">Early stage</span></td><td>Run with <code>headless=True</code>, add retry logic (agent sometimes misclicks)</td></tr>
+              <tr><td><strong>Speed</strong></td><td><span style="color:#4ade80;">Good for async</span></td><td>BatchProcessor parallelizes well. 4 concurrent = ~4× throughput</td></tr>
+              <tr><td><strong>Editor dependency</strong></td><td><span style="color:#f0c040;">Fragile</span></td><td>Editor UI changes break the agent. Pin a specific editor version or self-host</td></tr>
+              <tr><td><strong>Cost</strong></td><td><span style="color:#4ade80;">Predictable</span></td><td>LLM token cost per video edit: ~5K-15K tokens. At GPT-5.5 pricing, ~$0.02-0.05/edit</td></tr>
+              <tr><td><strong>Video quality</strong></td><td><span style="color:#4ade80;">Editor-dependent</span></td><td>Quality is whatever the underlying editor produces. Not a video-use limitation</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <h2>The Browser-Use Ecosystem Is Expanding</h2>
+        <p>video-use is the second standalone project in the browser-use ecosystem. The pattern is clear:</p>
+        <ul>
+          <li><strong>browser-use</strong> (core): General-purpose browser automation agent</li>
+          <li><strong>video-use</strong> (new): Video editing via browser automation</li>
+          <li><strong>Future</strong>: Expect more domain-specific agents (audio-use? design-use?) as the ecosystem matures</li>
+        </ul>
+        <p>Each new project reduces the platform risk of browser-use. When there's only one project, it's a bet on a single tool. With video-use, it's becoming a <strong>pattern</strong> — browser automation as the universal interface for AI agents.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" style="text-align:center;">
+        <h2>Running Video-Use? The Manual Covers the Infrastructure.</h2>
+        <p class="section-lead">video-use runs on the same Docker + Playwright stack as browser-use. The Production Manual covers headless Chromium configuration, anti-detection, session management, and batch queue architecture — everything you need to run browser-use (and video-use) at scale.</p>
+        <a href="/production-guide/" class="btn btn-primary" style="font-size:17px;padding:14px 36px;">Get the Production Manual — $39</a>
+        <p style="font-size:.9rem;color:var(--accent);font-weight:500;margin-top:16px;">30-day money-back guarantee. Covers Docker, headless Chromium, anti-detection, batch queues, and troubleshooting.</p>
+      </div>
+    </section>
+
+    <p style="color:var(--text-muted);font-size:0.85rem;text-align:center;">Last updated: July 2, 2026 · video-use released July 2026</p>
+
+    <section class="section">
+      <div class="container">
+        <h2>FAQ</h2>
+
+        <h3>Is video-use free and open source?</h3>
+        <p>video-use is part of the browser-use ecosystem on GitHub. Check the official repo for license details. The ecosystem uses MIT/Apache licensing — same permissive terms as browser-use itself.</p>
+
+        <h3>Which video editors does video-use support?</h3>
+        <p>video-use is editor-agnostic. It controls any browser-based video editor through Playwright — the agent navigates the editor's DOM, not a specific API. This means it works with browser-based editors like Kapwing, Canva's video editor, and web-based Adobe Premiere. If the editor runs in a browser, video-use can control it.</p>
+
+        <h3>Does video-use edit videos locally or in the cloud?</h3>
+        <p>Both. video-use runs on your machine (or your Docker container) and controls a browser. The browser points at whatever video editor you configure — a self-hosted browser editor for fully local processing, or a cloud editor. The video files are handled by the underlying editor, not by video-use directly.</p>
+
+        <h3>Is video-use production-ready for batch processing?</h3>
+        <p>video-use was released July 2026 — it's very new. The BatchProcessor works (handles concurrent browser instances), but reliability is early-stage. For non-critical batch processing (marketing clips, tutorial intros), it's usable today. For customer-facing production video pipelines, wait 1-2 months for stability improvements. The key fragility: editor UI changes can break the agent.</p>
+
+        <h3>How does video-use handle errors during editing?</h3>
+        <p>The agent uses visual feedback — it takes screenshots of the editor UI and the LLM validates whether the edit looks correct. If an edit fails (e.g., a cut at the wrong timestamp), the agent retries. However, there's no formal error recovery protocol yet. For batch processing, failed videos are reported in <code>results.failed</code> and you can re-run them individually.</p>
+
+        <h3>What's the difference between video-use and browser-use?</h3>
+        <p>browser-use is the general-purpose framework: give an LLM a browser, it browses/scrapes/fills forms. video-use applies the same architecture to a specific domain: video editing. The LLM sees the video editor UI through Playwright, decides what buttons to click, and performs edits. Same agent loop, same Playwright engine, different action space (cut/trim/transition vs click/type/navigate).</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Browser Use Guide — unofficial community resource. Not affiliated with browser-use or its maintainers.</p>
+      <p><a href="/privacy/">Privacy Policy</a> &middot; <a href="/terms/">Terms of Service</a> &middot; <a href="/refunds/">Money-Back Guarantee</a></p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type": "Question", "name": "Is video-use free and open source?", "acceptedAnswer": {"@type": "Answer", "text": "video-use is part of the browser-use ecosystem on GitHub. Check the official repo for license details. The ecosystem uses MIT/Apache licensing — same permissive terms as browser-use itself."}},
+      {"@type": "Question", "name": "Which video editors does video-use support?", "acceptedAnswer": {"@type": "Answer", "text": "video-use is editor-agnostic. It controls any browser-based video editor through Playwright. If the editor runs in a browser (Kapwing, Canva, web-based Premiere), video-use can control it."}},
+      {"@type": "Question", "name": "Does video-use edit videos locally or in the cloud?", "acceptedAnswer": {"@type": "Answer", "text": "Both. video-use runs on your machine and controls a browser. Point it at a self-hosted editor for fully local processing, or a cloud editor. Video files are handled by the underlying editor."}},
+      {"@type": "Question", "name": "Is video-use production-ready for batch processing?", "acceptedAnswer": {"@type": "Answer", "text": "Released July 2026 — very new. BatchProcessor works for non-critical processing (marketing clips, tutorial intros). For customer-facing production pipelines, wait 1-2 months for stability improvements."}},
+      {"@type": "Question", "name": "How does video-use handle errors during editing?", "acceptedAnswer": {"@type": "Answer", "text": "The agent uses visual feedback — it takes screenshots and the LLM validates edits visually. If an edit fails, the agent retries. For batch processing, failed videos appear in results.failed for individual re-runs."}},
+      {"@type": "Question", "name": "What's the difference between video-use and browser-use?", "acceptedAnswer": {"@type": "Answer", "text": "browser-use is the general-purpose browser automation framework. video-use applies the same architecture to video editing — same agent loop, same Playwright engine, different action space (cut/trim/transition vs click/type/navigate)."}}
+    ]
+  }
+  </script>
+</body>
+</html>

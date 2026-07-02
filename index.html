@@ -28,9 +28,25 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://runbrowseruse.com/" }
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "Browser Use Guide",
+        "url": "https://runbrowseruse.com/",
+        "description": "Unofficial community guide for self-hosting Browser Use in production."
+      },
+      {
+        "@type": "WebSite",
+        "name": "Browser Use Guide",
+        "url": "https://runbrowseruse.com/",
+        "description": "Self-hosted Browser Use production guides — Docker, headless Chromium, anti-detection."
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://runbrowseruse.com/" }
+        ]
+      }
     ]
   }
   </script>
@@ -98,6 +114,7 @@
         <li><a href="/">Home</a></li>
         <li><a href="/production-guide/">Production Guide</a></li>
         <li><a href="/chapters/docker-setup/">Free Chapters</a></li>
+        <li><a href="/video-use/">Video-Use</a></li>
         <li><a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">GitHub</a></li>
         <li><a href="/production-guide/" class="nav-cta">Get the Guide — $39</a></li>
       </ul>
